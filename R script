@@ -1,0 +1,479 @@
+
+R version 4.4.3 (2025-02-28 ucrt) -- "Trophy Case"
+Copyright (C) 2025 The R Foundation for Statistical Computing
+Platform: x86_64-w64-mingw32/x64
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+  Natural language support but running in an English locale
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+> data <- read.csv ("C:/Users/sray8/OneDrive/Desktop/MIS581/hrdata.csv")
+> head(data)
+  Age Attrition    BusinessTravel DailyRate             Department DistanceFromHome Education EducationField EmployeeCount EmployeeNumber EnvironmentSatisfaction Gender HourlyRate
+1  41       Yes     Travel_Rarely      1102                  Sales                1         2  Life Sciences             1              1                       2 Female         94
+2  49        No Travel_Frequently       279 Research & Development                8         1  Life Sciences             1              2                       3   Male         61
+3  37       Yes     Travel_Rarely      1373 Research & Development                2         2          Other             1              4                       4   Male         92
+4  33        No Travel_Frequently      1392 Research & Development                3         4  Life Sciences             1              5                       4 Female         56
+5  27        No     Travel_Rarely       591 Research & Development                2         1        Medical             1              7                       1   Male         40
+6  32        No Travel_Frequently      1005 Research & Development                2         2  Life Sciences             1              8                       4   Male         79
+  JobInvolvement JobLevel               JobRole JobSatisfaction MaritalStatus MonthlyIncome MonthlyRate NumCompaniesWorked Over18 OverTime PercentSalaryHike PerformanceRating
+1              3        2       Sales Executive               4        Single          5993       19479                  8      Y      Yes                11                 3
+2              2        2    Research Scientist               2       Married          5130       24907                  1      Y       No                23                 4
+3              2        1 Laboratory Technician               3        Single          2090        2396                  6      Y      Yes                15                 3
+4              3        1    Research Scientist               3       Married          2909       23159                  1      Y      Yes                11                 3
+5              3        1 Laboratory Technician               2       Married          3468       16632                  9      Y       No                12                 3
+6              3        1 Laboratory Technician               4        Single          3068       11864                  0      Y       No                13                 3
+  RelationshipSatisfaction StandardHours StockOptionLevel TotalWorkingYears TrainingTimesLastYear WorkLifeBalance YearsAtCompany YearsInCurrentRole YearsSinceLastPromotion
+1                        1            80                0                 8                     0               1              6                  4                       0
+2                        4            80                1                10                     3               3             10                  7                       1
+3                        2            80                0                 7                     3               3              0                  0                       0
+4                        3            80                0                 8                     3               3              8                  7                       3
+5                        4            80                1                 6                     3               3              2                  2                       2
+6                        3            80                0                 8                     2               2              7                  7                       3
+  YearsWithCurrManager
+1                    5
+2                    7
+3                    0
+4                    0
+5                    2
+6                    6
+> # Ensure Attrition is a binary factor
+> data$Attrition <- factor(data$Attrition, levels = c("No", "Yes"))
+> 
+> # Fit logistic regression model with employee characteristics
+> model_rq1 <- glm(Attrition ~ Age + Gender + YearsAtCompany + OverTime + MonthlyIncome, 
++                  data = data, family = binomial)
+> 
+> # View summary to assess which variables are significantly associated
+> summary(model_rq1)
+
+Call:
+glm(formula = Attrition ~ Age + Gender + YearsAtCompany + OverTime + 
+    MonthlyIncome, family = binomial, data = data)
+
+Coefficients:
+                 Estimate Std. Error z value Pr(>|z|)    
+(Intercept)    -4.416e-01  3.342e-01  -1.321 0.186427    
+Age            -3.389e-02  9.885e-03  -3.428 0.000608 ***
+GenderMale      2.091e-01  1.561e-01   1.339 0.180576    
+YearsAtCompany -4.000e-02  1.841e-02  -2.173 0.029816 *  
+OverTimeYes     1.421e+00  1.525e-01   9.319  < 2e-16 ***
+MonthlyIncome  -7.494e-05  2.606e-05  -2.876 0.004031 ** 
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+(Dispersion parameter for binomial family taken to be 1)
+
+    Null deviance: 1298.6  on 1469  degrees of freedom
+Residual deviance: 1146.9  on 1464  degrees of freedom
+AIC: 1158.9
+
+Number of Fisher Scoring iterations: 5
+
+> # Job Role vs Attrition
+> chisq.test(table(data$JobRole, data$Attrition))
+
+        Pearson's Chi-squared test
+
+data:  table(data$JobRole, data$Attrition)
+X-squared = 86.19, df = 8, p-value = 2.752e-15
+
+> 
+> # Department vs Attrition
+> chisq.test(table(data$Department, data$Attrition))
+
+        Pearson's Chi-squared test
+
+data:  table(data$Department, data$Attrition)
+X-squared = 10.796, df = 2, p-value = 0.004526
+
+> 
+> # Job Level vs Attrition
+> chisq.test(table(data$JobLevel, data$Attrition))
+
+        Pearson's Chi-squared test
+
+data:  table(data$JobLevel, data$Attrition)
+X-squared = 72.529, df = 4, p-value = 6.635e-15
+
+> model_rq3 <- glm(Attrition ~ JobSatisfaction, data = data, family = binomial)
+> summary(model_rq3)
+
+Call:
+glm(formula = Attrition ~ JobSatisfaction, family = binomial, 
+    data = data)
+
+Coefficients:
+                Estimate Std. Error z value Pr(>|z|)    
+(Intercept)      -0.9903     0.1757  -5.635 1.75e-08 ***
+JobSatisfaction  -0.2510     0.0637  -3.940 8.16e-05 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+(Dispersion parameter for binomial family taken to be 1)
+
+    Null deviance: 1298.6  on 1469  degrees of freedom
+Residual deviance: 1283.1  on 1468  degrees of freedom
+AIC: 1287.1
+
+Number of Fisher Scoring iterations: 4
+
+> # Train/test split
+> set.seed(123)
+> train_idx <- createDataPartition(data$Attrition, p = 0.7, list = FALSE)
+Error in createDataPartition(data$Attrition, p = 0.7, list = FALSE) : 
+  could not find function "createDataPartition"
+> train <- data[train_idx, ]
+Error: object 'train_idx' not found
+> test <- data[-train_idx, ]
+Error: object 'train_idx' not found
+> 
+> # Logistic regression model
+> model_rq4 <- glm(Attrition ~ ., data = train, family = binomial)
+Error in eval(mf, parent.frame()) : object 'train' not found
+> 
+> # Predict on test set
+> test_probs <- predict(model_rq4, newdata = test, type = "response")
+Error: object 'model_rq4' not found
+> 
+> # ROC and AUC
+> library(pROC)
+Type 'citation("pROC")' for a citation.
+
+Attaching package: ‘pROC’
+
+The following objects are masked from ‘package:stats’:
+
+    cov, smooth, var
+
+> roc_obj <- roc(test$Attrition, test_probs)
+Error: object 'test' not found
+> plot(roc_obj, col = "blue", main = "ROC Curve for Attrition Model")
+Error: object 'roc_obj' not found
+> auc_val <- auc(roc_obj)
+Error: object 'roc_obj' not found
+> cat("AUC:", auc_val, "\n")
+Error: object 'auc_val' not found
+> # Step 1: Install and load required packages
+> if (!require("caret")) install.packages("caret", dependencies = TRUE)
+Loading required package: caret
+Loading required package: ggplot2
+Loading required package: lattice
+Error: package or namespace load failed for ‘caret’ in loadNamespace(j <- i[[1L]], c(lib.loc, .libPaths()), versionCheck = vI[[j]]):
+ there is no package called ‘future’
+Installing package into ‘C:/Users/sray8/AppData/Local/R/win-library/4.4’
+(as ‘lib’ is unspecified)
+--- Please select a CRAN mirror for use in this session ---
+trying URL 'https://mirror.las.iastate.edu/CRAN/bin/windows/contrib/4.4/caret_7.0-1.zip'
+Content type 'application/zip' length 3602995 bytes (3.4 MB)
+downloaded 3.4 MB
+
+package ‘caret’ successfully unpacked and MD5 sums checked
+
+The downloaded binary packages are in
+        C:\Users\sray8\AppData\Local\Temp\RtmpkXHrm9\downloaded_packages
+> if (!require("pROC")) install.packages("pROC", dependencies = TRUE)
+> 
+> library(caret)
+Error: package or namespace load failed for ‘caret’ in loadNamespace(j <- i[[1L]], c(lib.loc, .libPaths()), versionCheck = vI[[j]]):
+ there is no package called ‘future’
+> library(pROC)
+> 
+> # Step 2: Ensure Attrition is a binary factor
+> data$Attrition <- factor(data$Attrition, levels = c("No", "Yes"))
+> 
+> # Step 3: Train/Test split
+> set.seed(123)
+> train_idx <- createDataPartition(data$Attrition, p = 0.7, list = FALSE)
+Error in createDataPartition(data$Attrition, p = 0.7, list = FALSE) : 
+  could not find function "createDataPartition"
+> train <- data[train_idx, ]
+Error: object 'train_idx' not found
+> test <- data[-train_idx, ]
+Error: object 'train_idx' not found
+> 
+> # Step 4: Train logistic regression model
+> model_rq4 <- glm(Attrition ~ ., data = train, family = binomial)
+Error in eval(mf, parent.frame()) : object 'train' not found
+> 
+> # Step 5: Predict probabilities on test set
+> test_probs <- predict(model_rq4, newdata = test, type = "response")
+Error: object 'model_rq4' not found
+> 
+> # Step 6: ROC curve and AUC
+> roc_obj <- roc(test$Attrition, test_probs)
+Error: object 'test' not found
+> plot(roc_obj, col = "blue", main = "ROC Curve for Attrition Model")
+Error: object 'roc_obj' not found
+> auc_val <- auc(roc_obj)
+Error: object 'roc_obj' not found
+> cat("AUC:", auc_val, "\n")
+Error: object 'auc_val' not found
+> install.packages("future", dependencies = TRUE)
+Installing package into ‘C:/Users/sray8/AppData/Local/R/win-library/4.4’
+(as ‘lib’ is unspecified)
+also installing the dependencies ‘litedown’, ‘parallelly’, ‘RhpcBLASctl’, ‘R.rsp’, ‘markdown’
+
+
+  There is a binary version available but the source version is later:
+       binary source needs_compilation
+future 1.40.0 1.49.0             FALSE
+
+trying URL 'https://mirror.las.iastate.edu/CRAN/bin/windows/contrib/4.4/litedown_0.7.zip'
+Content type 'application/zip' length 378447 bytes (369 KB)
+downloaded 369 KB
+
+trying URL 'https://mirror.las.iastate.edu/CRAN/bin/windows/contrib/4.4/parallelly_1.44.0.zip'
+Content type 'application/zip' length 604063 bytes (589 KB)
+downloaded 589 KB
+
+trying URL 'https://mirror.las.iastate.edu/CRAN/bin/windows/contrib/4.4/RhpcBLASctl_0.23-42.zip'
+Content type 'application/zip' length 133385 bytes (130 KB)
+downloaded 130 KB
+
+trying URL 'https://mirror.las.iastate.edu/CRAN/bin/windows/contrib/4.4/R.rsp_0.46.0.zip'
+Content type 'application/zip' length 1476771 bytes (1.4 MB)
+downloaded 1.4 MB
+
+trying URL 'https://mirror.las.iastate.edu/CRAN/bin/windows/contrib/4.4/markdown_2.0.zip'
+Content type 'application/zip' length 67594 bytes (66 KB)
+downloaded 66 KB
+
+package ‘litedown’ successfully unpacked and MD5 sums checked
+package ‘parallelly’ successfully unpacked and MD5 sums checked
+package ‘RhpcBLASctl’ successfully unpacked and MD5 sums checked
+package ‘R.rsp’ successfully unpacked and MD5 sums checked
+package ‘markdown’ successfully unpacked and MD5 sums checked
+
+The downloaded binary packages are in
+        C:\Users\sray8\AppData\Local\Temp\RtmpkXHrm9\downloaded_packages
+installing the source package ‘future’
+
+trying URL 'https://mirror.las.iastate.edu/CRAN/src/contrib/future_1.49.0.tar.gz'
+Content type 'application/x-gzip' length 426921 bytes (416 KB)
+downloaded 416 KB
+
+* installing *source* package 'future' ...
+** package 'future' successfully unpacked and MD5 sums checked
+** using staged installation
+** R
+** demo
+** inst
+** byte-compile and prepare package for lazy loading
+** help
+*** installing help indices
+*** copying figures
+** building package indices
+** installing vignettes
+** testing if installed package can be loaded from temporary location
+** testing if installed package can be loaded from final location
+** testing if installed package keeps a record of temporary installation path
+* DONE (future)
+
+The downloaded source packages are in
+        ‘C:\Users\sray8\AppData\Local\Temp\RtmpkXHrm9\downloaded_packages’
+> install.packages("caret", dependencies = TRUE)
+Installing package into ‘C:/Users/sray8/AppData/Local/R/win-library/4.4’
+(as ‘lib’ is unspecified)
+trying URL 'https://mirror.las.iastate.edu/CRAN/bin/windows/contrib/4.4/caret_7.0-1.zip'
+Content type 'application/zip' length 3602995 bytes (3.4 MB)
+downloaded 3.4 MB
+
+package ‘caret’ successfully unpacked and MD5 sums checked
+
+The downloaded binary packages are in
+        C:\Users\sray8\AppData\Local\Temp\RtmpkXHrm9\downloaded_packages
+> library(caret)
+> library(pROC)
+> # Ensure Attrition is a binary factor
+> data$Attrition <- factor(data$Attrition, levels = c("No", "Yes"))
+> 
+> # Train/Test Split
+> set.seed(123)
+> train_idx <- createDataPartition(data$Attrition, p = 0.7, list = FALSE)
+> train <- data[train_idx, ]
+> test <- data[-train_idx, ]
+> 
+> # Logistic Regression Model
+> model_rq4 <- glm(Attrition ~ ., data = train, family = binomial)
+Error in `contrasts<-`(`*tmp*`, value = contr.funs[1 + isOF[nn]]) : 
+  contrasts can be applied only to factors with 2 or more levels
+> 
+> # Predict Probabilities on Test Set
+> test_probs <- predict(model_rq4, newdata = test, type = "response")
+Error: object 'model_rq4' not found
+> 
+> # ROC Curve and AUC
+> roc_obj <- roc(test$Attrition, test_probs)
+Error: object 'test_probs' not found
+> plot(roc_obj, col = "blue", main = "ROC Curve for Attrition Model")
+Error: object 'roc_obj' not found
+> auc_val <- auc(roc_obj)
+Error: object 'roc_obj' not found
+> cat("AUC:", auc_val, "\n")
+Error: object 'auc_val' not found
+> # 1. Drop variables in training data that have only one level
+> train_clean <- train[, sapply(train, function(x) length(unique(x)) > 1)]
+> 
+> # 2. Refit logistic regression with cleaned training data
+> model_rq4 <- glm(Attrition ~ ., data = train_clean, family = binomial)
+> summary(model_rq4)
+
+Call:
+glm(formula = Attrition ~ ., family = binomial, data = train_clean)
+
+Coefficients:
+                                   Estimate Std. Error z value Pr(>|z|)    
+(Intercept)                      -1.368e+01  1.411e+03  -0.010 0.992268    
+Age                              -2.040e-02  1.648e-02  -1.238 0.215687    
+BusinessTravelTravel_Frequently   2.590e+00  5.572e-01   4.648 3.36e-06 ***
+BusinessTravelTravel_Rarely       1.648e+00  5.194e-01   3.173 0.001508 ** 
+DailyRate                        -1.446e-04  2.645e-04  -0.547 0.584480    
+DepartmentResearch & Development  1.512e+01  1.411e+03   0.011 0.991454    
+DepartmentSales                   5.119e-01  1.605e+03   0.000 0.999746    
+DistanceFromHome                  4.938e-02  1.307e-02   3.778 0.000158 ***
+Education                        -4.837e-03  1.066e-01  -0.045 0.963828    
+EducationFieldLife Sciences      -3.859e-01  9.090e-01  -0.425 0.671153    
+EducationFieldMarketing           9.191e-02  9.706e-01   0.095 0.924559    
+EducationFieldMedical            -4.349e-01  9.153e-01  -0.475 0.634693    
+EducationFieldOther              -4.245e-01  1.004e+00  -0.423 0.672397    
+EducationFieldTechnical Degree    3.988e-01  9.426e-01   0.423 0.672226    
+EmployeeNumber                   -1.329e-04  1.812e-04  -0.734 0.463210    
+EnvironmentSatisfaction          -4.640e-01  1.016e-01  -4.565 5.00e-06 ***
+GenderMale                        5.228e-01  2.287e-01   2.286 0.022281 *  
+HourlyRate                        2.054e-03  5.317e-03   0.386 0.699207    
+JobInvolvement                   -4.198e-01  1.494e-01  -2.810 0.004953 ** 
+JobLevel                         -2.739e-01  3.957e-01  -0.692 0.488819    
+JobRoleHuman Resources            1.673e+01  1.411e+03   0.012 0.990545    
+JobRoleLaboratory Technician      1.612e+00  5.874e-01   2.745 0.006052 ** 
+JobRoleManager                   -3.971e-01  1.085e+00  -0.366 0.714253    
+JobRoleManufacturing Director     5.857e-01  6.002e-01   0.976 0.329099    
+JobRoleResearch Director         -2.119e+00  1.322e+00  -1.603 0.108927    
+JobRoleResearch Scientist         4.954e-01  6.107e-01   0.811 0.417251    
+JobRoleSales Executive            1.555e+01  7.646e+02   0.020 0.983776    
+JobRoleSales Representative       1.656e+01  7.646e+02   0.022 0.982724    
+JobSatisfaction                  -4.283e-01  9.903e-02  -4.326 1.52e-05 ***
+MaritalStatusMarried             -9.588e-03  3.138e-01  -0.031 0.975626    
+MaritalStatusSingle               1.151e+00  4.092e-01   2.814 0.004895 ** 
+MonthlyIncome                     1.345e-04  9.990e-05   1.346 0.178233    
+MonthlyRate                      -5.843e-06  1.532e-05  -0.381 0.702860    
+NumCompaniesWorked                1.553e-01  4.794e-02   3.240 0.001194 ** 
+OverTimeYes                       1.924e+00  2.361e-01   8.147 3.72e-16 ***
+PercentSalaryHike                -2.247e-02  4.717e-02  -0.476 0.633784    
+PerformanceRating                -5.006e-02  4.805e-01  -0.104 0.917034    
+RelationshipSatisfaction         -2.760e-01  1.054e-01  -2.618 0.008834 ** 
+StockOptionLevel                 -1.944e-01  1.912e-01  -1.017 0.309341    
+TotalWorkingYears                -8.553e-02  3.618e-02  -2.364 0.018068 *  
+TrainingTimesLastYear            -1.645e-01  8.677e-02  -1.895 0.058035 .  
+WorkLifeBalance                  -3.565e-01  1.530e-01  -2.329 0.019833 *  
+YearsAtCompany                    8.607e-02  5.366e-02   1.604 0.108697    
+YearsInCurrentRole               -1.850e-01  5.658e-02  -3.271 0.001073 ** 
+YearsSinceLastPromotion           1.804e-01  5.233e-02   3.448 0.000566 ***
+YearsWithCurrManager             -1.033e-01  5.986e-02  -1.726 0.084426 .  
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+(Dispersion parameter for binomial family taken to be 1)
+
+    Null deviance: 909.69  on 1029  degrees of freedom
+Residual deviance: 594.55  on  984  degrees of freedom
+AIC: 686.55
+
+Number of Fisher Scoring iterations: 16
+
+> # 3. Subset test data to same variables as training (except Attrition)
+> test_clean <- test[, names(train_clean)]
+> # 4. Predict Probabilities
+> test_probs <- predict(model_rq4, newdata = test_clean, type = "response")
+> 
+> # 5. ROC Curve and AUC
+> roc_obj <- roc(test_clean$Attrition, test_probs)
+Setting levels: control = No, case = Yes
+Setting direction: controls < cases
+> plot(roc_obj, col = "blue", main = "ROC Curve for Attrition Model")
+> auc_val <- auc(roc_obj)
+> cat("AUC:", auc_val, "\n")
+AUC: 0.8393832 
+> # Split JobSatisfaction by Attrition status
+> with(data, wilcox.test(JobSatisfaction ~ Attrition))
+
+        Wilcoxon rank sum test with continuity correction
+
+data:  JobSatisfaction by Attrition
+W = 168859, p-value = 7.958e-05
+alternative hypothesis: true location shift is not equal to 0
+
+> model_rq1 <- glm(Attrition ~ Age + Gender + YearsAtCompany + OverTime + MonthlyIncome + DistanceFromHome,
++                  data = data,
++                  family = binomial)
+> 
+> summary(model_rq1)
+
+Call:
+glm(formula = Attrition ~ Age + Gender + YearsAtCompany + OverTime + 
+    MonthlyIncome + DistanceFromHome, family = binomial, data = data)
+
+Coefficients:
+                   Estimate Std. Error z value Pr(>|z|)    
+(Intercept)      -6.820e-01  3.441e-01  -1.982 0.047497 *  
+Age              -3.429e-02  9.937e-03  -3.451 0.000558 ***
+GenderMale        2.029e-01  1.567e-01   1.294 0.195524    
+YearsAtCompany   -4.172e-02  1.850e-02  -2.255 0.024138 *  
+OverTimeYes       1.428e+00  1.534e-01   9.310  < 2e-16 ***
+MonthlyIncome    -7.720e-05  2.632e-05  -2.933 0.003357 ** 
+DistanceFromHome  2.829e-02  9.040e-03   3.129 0.001752 ** 
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+(Dispersion parameter for binomial family taken to be 1)
+
+    Null deviance: 1298.6  on 1469  degrees of freedom
+Residual deviance: 1137.4  on 1463  degrees of freedom
+AIC: 1151.4
+
+Number of Fisher Scoring iterations: 5
+
+> exp(1.428)
+[1] 4.17035
+> exp(–0.0343)
+Error: unexpected invalid token in "exp(–"
+> exp(0.0343)
+[1] 1.034895
+> # Create a cross-tabulation of JobRole and Attrition
+> table(data$JobRole, data$Attrition)
+                           
+                             No Yes
+  Healthcare Representative 122   9
+  Human Resources            40  12
+  Laboratory Technician     197  62
+  Manager                    97   5
+  Manufacturing Director    135  10
+  Research Director          78   2
+  Research Scientist        245  47
+  Sales Executive           269  57
+  Sales Representative       50  33
+> 
+> # Or to view proportions
+> prop.table(table(data$JobRole, data$Attrition), margin = 1)
+                           
+                                    No        Yes
+  Healthcare Representative 0.93129771 0.06870229
+  Human Resources           0.76923077 0.23076923
+  Laboratory Technician     0.76061776 0.23938224
+  Manager                   0.95098039 0.04901961
+  Manufacturing Director    0.93103448 0.06896552
+  Research Director         0.97500000 0.02500000
+  Research Scientist        0.83904110 0.16095890
+  Sales Executive           0.82515337 0.17484663
+  Sales Representative      0.60240964 0.39759036
+> 
